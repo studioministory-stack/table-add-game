@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jod Master – Add Game</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7c4dff">
+<link rel="icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg1:#7c4dff;--bg2:#ff6ec7;--card:#fff;--ink:#2b1b5a;--ok:#2ecc71;--bad:#ff5a5f;--gold:#ffc83d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -71,7 +74,7 @@ h1{color:#fff;text-align:center;font-size:2.2rem;margin:8px 0 0;text-shadow:0 4p
 </div>
 
 <div id="game" class="screen">
-  <div class="top"><button class="back" id="back">🏠</button><div class="bar"><i id="fill"></i></div><div class="cnt" id="cnt">1/20</div></div>
+  <div class="top"><button class="back" id="back">🏠</button><div class="bar"><i id="fill"></i></div><div class="cnt" id="cnt">1/20</div><button class="back" id="vbtn">🔊</button></div>
   <div class="q"><div class="eq" id="eq"></div></div>
   <div class="msg" id="msg"></div>
   <div class="opts" id="opts"></div>
@@ -94,6 +97,12 @@ const persist=()=>{try{localStorage.setItem("jodmaster",JSON.stringify(save))}ca
 let AC=null;
 function tone(f,t,d,type){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type||"triangle";o.frequency.value=f;o.connect(g);g.connect(AC.destination);const s=AC.currentTime+t;g.gain.setValueAtTime(.2,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.start(s);o.stop(s+d)}catch(e){}}
 const sfx={ok:()=>{tone(660,0,.15);tone(880,.1,.2)},bad:()=>tone(180,0,.3,"sawtooth"),win:()=>[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,i*.16,.35)),tap:()=>tone(440,0,.08)};
+let voiceOn=true,VO=null;
+function pickVoice(){const v=speechSynthesis.getVoices();VO=v.find(x=>x.lang==="hi-IN")||v.find(x=>/^hi/i.test(x.lang))||v.find(x=>x.lang==="en-IN")||null}
+try{speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}catch(e){}
+function say(t,pitch){if(!voiceOn)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="hi-IN";if(VO)u.voice=VO;u.pitch=pitch||1.7;u.rate=.95;u.volume=1;setTimeout(()=>speechSynthesis.speak(u),120)}catch(e){}}
+const praiseV=["वाह! शाबाश!","कमाल कर दिया!","सुपर! बहुत बढ़िया!","ज़बरदस्त!","वाह वाह! तुम तो चैंपियन हो!","मस्त! बिल्कुल सही!"];
+const retryV=["कोई बात नहीं, फिर से कोशिश करो!","बस थोड़ा और, तुम कर लोगे!","ध्यान से सोचो, तुम चैंपियन हो!"];
 const show=id=>{["home","game"].forEach(s=>$(s).classList.toggle("on",s===id))};
 
 function buildHome(){
@@ -121,6 +130,7 @@ function ask(){
   $("cnt").textContent=(i+1)+"/20";
   $("fill").style.width=(i/20*100)+"%";
   $("msg").textContent="";
+  say(a+" जमा "+n+" कितने होते हैं?",1.3);
   const set=new Set([ans]);
   [-1,1,-2,2,10,-10,3].sort(()=>Math.random()-.5).forEach(d=>{if(set.size<4&&ans+d>0)set.add(ans+d)});
   let k=1;while(set.size<4)set.add(ans+k++);
@@ -135,12 +145,12 @@ function pick(b,v,ans){
   if(v===ans){
     locked=true;if(!tried)score++;
     b.classList.add("right");sfx.ok();
-    $("msg").textContent=praise[Math.floor(Math.random()*praise.length)];
+    const pi=Math.floor(Math.random()*praise.length);$("msg").textContent=praise[pi];say(praiseV[pi]);
     sparkle(b);
     setTimeout(()=>{i++;i<20?ask():finish()},900);
   }else{
     tried=true;b.classList.add("wrong");sfx.bad();
-    $("msg").textContent=retry[Math.floor(Math.random()*retry.length)];
+    const ri=Math.floor(Math.random()*retry.length);$("msg").textContent=retry[ri];say(retryV[ri],1.4);
   }
 }
 function sparkle(el){
@@ -166,7 +176,7 @@ function finish(){
   if(n<20)mk("Agla: +"+(n+1)+" ➡️",()=>start(n+1),1);
   mk("🔁 Dobara",()=>start(n));
   mk("🏠 Home",()=>{$("end").classList.remove("on");buildHome();show("home")});
-  $("end").classList.add("on");sfx.win();celebrate();
+  $("end").classList.add("on");sfx.win();celebrate();say("बधाई हो! तुम "+(st===3?"सुपर चैंपियन":"बहुत होशियार")+" हो!",1.8);
 }
 function celebrate(){
   const em=["🎈","🎈","🎈","🎀","🎈"];
@@ -183,8 +193,10 @@ function celebrate(){
     document.body.appendChild(c);setTimeout(()=>c.remove(),7500);
   }
 }
+$("vbtn").onclick=()=>{voiceOn=!voiceOn;$("vbtn").textContent=voiceOn?"🔊":"🔇";try{speechSynthesis.cancel()}catch(e){}};
 $("back").onclick=()=>{buildHome();show("home")};
 buildHome();
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 </body>
 </html>
