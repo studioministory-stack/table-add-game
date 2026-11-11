@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jod Master – Add Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#7c4dff;--bg2:#ff6ec7;--card:#fff;--ink:#2b1b5a;--ok:#2ecc71;--bad:#ff5a5f;--gold:#ffc83d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#2a1a6e;--bg2:#6a1b6f;--card:#2d2358;--ink:#fff}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:"Baloo 2","Comic Sans MS",system-ui,sans-serif;color:var(--ink);background:linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed;overflow-x:hidden}
+.screen{display:none;max-width:560px;margin:0 auto;padding:16px;min-height:100%}
+.screen.on{display:block}
+h1{color:#fff;text-align:center;font-size:2.2rem;margin:8px 0 0;text-shadow:0 4px 0 rgba(0,0,0,.2)}
+.sub{color:#fff;text-align:center;margin:0 0 14px;opacity:.95}
+.lion{font-size:4rem;text-align:center;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px) rotate(4deg)}}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.lv{background:var(--card);color:var(--ink);border:0;border-radius:18px;padding:10px 4px;font:800 1.5rem "Baloo 2",system-ui;box-shadow:0 6px 0 rgba(0,0,0,.2);cursor:pointer;transition:transform .1s}
+.lv:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.lv small{display:block;font-size:.85rem;color:#e6a100;letter-spacing:1px;min-height:1.2em}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.back{background:rgba(255,255,255,.3);border:0;color:#fff;font-size:1.4rem;border-radius:14px;padding:4px 12px;cursor:pointer}
+.bar{flex:1;height:18px;background:rgba(255,255,255,.3);border-radius:20px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ff9f1c);border-radius:20px;transition:width .4s}
+.cnt{color:#fff;font-weight:800}
+.q{background:var(--card);border-radius:28px;padding:20px 10px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.2);margin:10px 0 16px}
+.q .eq{font-size:clamp(2.6rem,13vw,4.2rem);font-weight:800;line-height:1.1}
+.q .eq b{color:#ff4fa3}
+.msg{min-height:1.8em;color:#fff;text-align:center;font-weight:800;font-size:1.3rem;margin-bottom:8px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.op{border:0;border-radius:22px;padding:18px 0;font:800 2.2rem "Baloo 2",system-ui;color:#fff;cursor:pointer;box-shadow:0 7px 0 rgba(0,0,0,.25);transition:transform .1s}
+.op:nth-child(1){background:#00b4d8}.op:nth-child(2){background:#ff9f1c}.op:nth-child(3){background:#9b5de5}.op:nth-child(4){background:#06d6a0}
+.op:active{transform:translateY(5px)}
+.op.right{background:var(--ok);animation:pop .5s}
+.op.wrong{background:var(--bad);animation:shake .4s;opacity:.55}
+@keyframes pop{50%{transform:scale(1.15)}}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+#end{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#fff;padding:20px;background:radial-gradient(circle at 50% 35%,#5b2bd6 0,#14082f 70%);overflow:hidden}
+#end.on{display:flex;animation:fade 1s}
+@keyframes fade{from{opacity:0}}
+.beam{position:absolute;top:-10%;left:50%;width:140vmax;height:140vmax;margin-left:-70vmax;background:conic-gradient(from 0deg,rgba(255,220,100,.28),transparent 10%,rgba(255,220,100,.28) 20%,transparent 30%,rgba(255,220,100,.28) 40%,transparent 50%,rgba(255,220,100,.28) 60%,transparent 70%,rgba(255,220,100,.28) 80%,transparent 90%);animation:spin 18s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#end>*{position:relative}
+.trophy{font-size:7rem;animation:drop 1.2s cubic-bezier(.2,1.6,.4,1) both,bob 2s 1.2s infinite}
+@keyframes drop{from{transform:translateY(-120vh) scale(.3)}}
+.big{font-size:clamp(2.4rem,11vw,4rem);font-weight:800;color:var(--gold);text-shadow:0 0 30px #ff9f1c;margin:0}
+.big span{display:inline-block;opacity:0;animation:letter .5s forwards}
+@keyframes letter{from{opacity:0;transform:translateY(40px) scale(.3)}to{opacity:1;transform:none}}
+.stars{font-size:3rem;letter-spacing:6px}
+.stars s{text-decoration:none;display:inline-block;opacity:0;animation:star .6s forwards}
+@keyframes star{from{opacity:0;transform:scale(0) rotate(-180deg)}to{opacity:1;transform:none}}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.btns button{border:0;border-radius:18px;padding:12px 20px;font:800 1.2rem "Baloo 2",system-ui;background:#fff;color:#2b1b5a;box-shadow:0 5px 0 rgba(0,0,0,.3);cursor:pointer}
+.btns button.pri{background:var(--gold)}
+.fly{position:fixed;pointer-events:none;z-index:30}
+.balloon{font-size:3.2rem;bottom:-80px;animation:rise linear forwards}
+@keyframes rise{to{transform:translateY(-120vh) rotate(15deg)}}
+.conf{top:-20px;width:10px;height:16px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+<div id="home" class="screen on">
+  <div class="lion">🦁</div>
+  <h1>Jod Master!</h1>
+  <p class="sub">Kaunsa “add” khelna hai? Chuno aur sitare jeeto ⭐</p>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="game" class="screen">
+  <div class="top"><button class="back" id="back">🏠</button><div class="bar"><i id="fill"></i></div><div class="cnt" id="cnt">1/20</div></div>
+  <div class="q"><div class="eq" id="eq"></div></div>
+  <div class="msg" id="msg"></div>
+  <div class="opts" id="opts"></div>
+</div>
+
+<div id="end">
+  <div class="beam"></div>
+  <div class="trophy">🏆</div>
+  <h2 class="big" id="big"></h2>
+  <div class="stars" id="stars"></div>
+  <p id="score" style="font-size:1.4rem;font-weight:800;margin:6px 0"></p>
+  <div class="btns" id="ebtns"></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let save={};
+try{save=JSON.parse(localStorage.getItem("jodmaster")||"{}")}catch(e){}
+const persist=()=>{try{localStorage.setItem("jodmaster",JSON.stringify(save))}catch(e){}};
+let AC=null;
+function tone(f,t,d,type){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type||"triangle";o.frequency.value=f;o.connect(g);g.connect(AC.destination);const s=AC.currentTime+t;g.gain.setValueAtTime(.2,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.start(s);o.stop(s+d)}catch(e){}}
+const sfx={ok:()=>{tone(660,0,.15);tone(880,.1,.2)},bad:()=>tone(180,0,.3,"sawtooth"),win:()=>[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,i*.16,.35)),tap:()=>tone(440,0,.08)};
+const show=id=>{["home","game"].forEach(s=>$(s).classList.toggle("on",s===id))};
+
+function buildHome(){
+  $("grid").innerHTML="";
+  for(let n=1;n<=20;n++){
+    const b=document.createElement("button");b.className="lv";
+    b.innerHTML="+"+n+"<small>"+("⭐".repeat(save[n]||0)||"·")+"</small>";
+    b.onclick=()=>{sfx.tap();start(n)};
+    $("grid").appendChild(b);
+  }
+}
+
+let n=0,list=[],i=0,score=0,tried=false,locked=false;
+const praise=["Wah! 🎉","Shabash! 🌟","Kamaal! 🚀","Super! 💪","Zabardast! 🔥","Mast! 😎"];
+const retry=["Koi baat nahi, phir try karo! 💛","Bas thoda aur, tum kar loge! 🌈","Dhyan se socho, tum champion ho! 🦁"];
+
+function start(num){
+  n=num;i=0;score=0;
+  list=[...Array(20).keys()].map(x=>x+1).sort(()=>Math.random()-.5);
+  $("end").classList.remove("on");show("game");ask();
+}
+function ask(){
+  const a=list[i],ans=a+n;tried=false;locked=false;
+  $("eq").innerHTML=a+" + "+n+" = <b>?</b>";
+  $("cnt").textContent=(i+1)+"/20";
+  $("fill").style.width=(i/20*100)+"%";
+  $("msg").textContent="";
+  const set=new Set([ans]);
+  [-1,1,-2,2,10,-10,3].sort(()=>Math.random()-.5).forEach(d=>{if(set.size<4&&ans+d>0)set.add(ans+d)});
+  let k=1;while(set.size<4)set.add(ans+k++);
+  $("opts").innerHTML="";
+  [...set].sort(()=>Math.random()-.5).forEach(v=>{
+    const b=document.createElement("button");b.className="op";b.textContent=v;
+    b.onclick=()=>pick(b,v,ans);$("opts").appendChild(b);
+  });
+}
+function pick(b,v,ans){
+  if(locked||b.classList.contains("wrong"))return;
+  if(v===ans){
+    locked=true;if(!tried)score++;
+    b.classList.add("right");sfx.ok();
+    $("msg").textContent=praise[Math.floor(Math.random()*praise.length)];
+    sparkle(b);
+    setTimeout(()=>{i++;i<20?ask():finish()},900);
+  }else{
+    tried=true;b.classList.add("wrong");sfx.bad();
+    $("msg").textContent=retry[Math.floor(Math.random()*retry.length)];
+  }
+}
+function sparkle(el){
+  const r=el.getBoundingClientRect();
+  for(let k=0;k<14;k++){
+    const c=document.createElement("div");c.className="fly conf";
+    c.style.left=(r.left+r.width/2+(Math.random()*80-40))+"px";c.style.top=(r.top)+"px";
+    c.style.background=["#ffc83d","#ff6ec7","#00b4d8","#2ecc71"][k%4];
+    c.style.animationDuration=(.8+Math.random()*.8)+"s";
+    document.body.appendChild(c);setTimeout(()=>c.remove(),1800);
+  }
+}
+function finish(){
+  $("fill").style.width="100%";
+  const st=score>=18?3:score>=14?2:1;
+  if(st>(save[n]||0)){save[n]=st;persist()}
+  const title=st===3?"SUPER CHAMPION!":st===2?"SHABASH!":"BAHUT BADHIYA!";
+  $("big").innerHTML=[...title].map((c,k)=>"<span style=\"animation-delay:"+(.8+k*.07)+"s\">"+(c===" "?"&nbsp;":c)+"</span>").join("");
+  $("stars").innerHTML=[1,2,3].map(k=>"<s style=\"animation-delay:"+(1.8+k*.4)+"s\">"+(k<=st?"⭐":"☆")+"</s>").join("");
+  $("score").textContent="+"+n+" wale 20 mein se "+score+" pehli baar mein sahi! 🎯";
+  const eb=$("ebtns");eb.innerHTML="";
+  const mk=(t,f,p)=>{const b=document.createElement("button");b.textContent=t;if(p)b.className="pri";b.onclick=f;eb.appendChild(b)};
+  if(n<20)mk("Agla: +"+(n+1)+" ➡️",()=>start(n+1),1);
+  mk("🔁 Dobara",()=>start(n));
+  mk("🏠 Home",()=>{$("end").classList.remove("on");buildHome();show("home")});
+  $("end").classList.add("on");sfx.win();celebrate();
+}
+function celebrate(){
+  const em=["🎈","🎈","🎈","🎀","🎈"];
+  for(let k=0;k<26;k++){
+    const b=document.createElement("div");b.className="fly balloon";b.textContent="🎈";
+    b.style.left=(Math.random()*92)+"vw";b.style.filter="hue-rotate("+Math.floor(Math.random()*360)+"deg)";
+    b.style.animationDuration=(4+Math.random()*4)+"s";b.style.animationDelay=(Math.random()*2.5)+"s";
+    document.body.appendChild(b);setTimeout(()=>b.remove(),10000);
+  }
+  for(let k=0;k<70;k++){
+    const c=document.createElement("div");c.className="fly conf";
+    c.style.left=(Math.random()*100)+"vw";c.style.background=["#ffc83d","#ff6ec7","#00b4d8","#2ecc71","#fff"][k%5];
+    c.style.animationDuration=(2+Math.random()*3)+"s";c.style.animationDelay=(Math.random()*2)+"s";
+    document.body.appendChild(c);setTimeout(()=>c.remove(),7500);
+  }
+}
+$("back").onclick=()=>{buildHome();show("home")};
+buildHome();
+</script>
+</body>
+</html>
