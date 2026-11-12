@@ -71,6 +71,12 @@ h1{color:#fff;text-align:center;font-size:2.2rem;margin:8px 0 0;text-shadow:0 4p
 .conf{top:-20px;width:10px;height:16px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 .mode.wide{grid-column:1/-1}
+.vis.mid{font-size:2.5rem;line-height:1.3}
+.nn{font-size:2.1rem;font-weight:800;margin:0 5px;color:#ff4fa3;display:inline-block}
+.mini{display:inline-block;vertical-align:middle;margin:2px}
+.vis .mini svg{width:100%;height:auto;margin:0;display:block}
+.vis .wide svg{width:min(94%,340px)}
+.vis .row{font-size:1.5rem;text-align:left;padding:0 8px;line-height:1.35}
 .eq.txt{font-size:clamp(1.25rem,5.6vw,1.8rem);line-height:1.3}
 .vis svg{width:min(50vw,180px);height:auto;display:block;margin:0 auto}
 .vis.big{font-size:5.2rem;line-height:1.1}
@@ -128,7 +134,15 @@ const MODES={
  sub:{t:"Minus",e:"➖",sym:"−",c:"#ff6b6b",w:"घटा"},
  mul:{t:"Multiply",e:"✖️",sym:"×",c:"#9b5de5",w:"गुणा"},
  tab:{t:"Table",e:"📖",sym:"×",c:"#06a77d",w:"गुणा"},
- shp:{t:"Shapes",e:"🔷",sym:"",c:"#ff7a59",w:""}};
+ shp:{t:"Shapes",e:"🔷",sym:"",c:"#ff7a59",w:""},
+ time:{t:"Time",e:"🕐",sym:"",c:"#3a86ff",w:""},
+ money:{t:"Paise",e:"💰",sym:"",c:"#2a9d8f",w:""},
+ num:{t:"Numbers",e:"🔢",sym:"",c:"#e76f51",w:""},
+ meas:{t:"Naap-Tol",e:"📏",sym:"",c:"#8338ec",w:""},
+ div:{t:"Barabar baanto",e:"➗",sym:"",c:"#fb5607",w:""},
+ pat:{t:"Patterns",e:"🧩",sym:"",c:"#06a77d",w:""},
+ data:{t:"Data",e:"📊",sym:"",c:"#d62828",w:""},
+ frac:{t:"Fractions",e:"🍕",sym:"",c:"#f77f00",w:""}};
 const CUTE=["🍦","🧁","🍭","🍎","🐥","🐶","🌸","⭐","🍓","🐱"];
 //SHAPES
 const SH={circle:{n:"Circle",h:"गोल",d:2,s:"सर्कल"},square:{n:"Square",h:"वर्ग",d:2,s:"स्क्वेयर"},rectangle:{n:"Rectangle",h:"आयत",d:2,s:"रेक्टैंगल"},triangle:{n:"Triangle",h:"त्रिभुज",d:2,s:"ट्राएंगल"},oval:{n:"Oval",h:"अंडाकार",d:2,s:"ओवल"},star:{n:"Star",h:"तारा",d:2,s:"स्टार"},heart:{n:"Heart",h:"दिल",d:2,s:"हार्ट"},diamond:{n:"Diamond",h:"हीरा",d:2,s:"डायमंड"},pentagon:{n:"Pentagon",h:"पंचभुज",d:2,s:"पेंटागन"},hexagon:{n:"Hexagon",h:"षट्भुज",d:2,s:"हेक्सागन"},semicircle:{n:"Semicircle",h:"अर्धवृत्त",d:2,s:"सेमीसर्कल"},
@@ -178,22 +192,164 @@ const SL=[{n:"2D Shapes",e:"🔺"},{n:"3D Shapes",e:"🧊"},{n:"Ghar ki cheezein
 const BASIC=["id","obj","prop","num"];
 const PF=[q=>q.dm===2&&q.d!=="h"&&BASIC.includes(q.c),q=>q.dm===3&&q.d!=="h"&&BASIC.includes(q.c),q=>q.c==="obj"||q.obj,q=>q.c==="dim"||q.c==="kind",q=>q.d!=="e"];
 const poolFor=n=>sw_(BANK.filter(PF[n-1])).slice(0,20);
-function lab(v){if(SH[v])return{t:SH[v].n,sm:SH[v].h};if(v==="2D")return{t:"2D",sm:"सपाट (flat)"};if(v==="3D")return{t:"3D",sm:"ठोस (solid)"};return{t:v}}
+function lab(v){if(SH[v])return{t:SH[v].n,sm:SH[v].h};if(v==="2D")return{t:"2D",sm:"सपाट (flat)"};if(v==="3D")return{t:"3D",sm:"ठोस (solid)"};if(v.includes("|")){const x=v.split("|");return{t:x[0],sm:x[1]}}return{t:v}}
 function optsFor(q){if(q.opts)return sw_(q.opts.slice());
  if(q.num){const a=+q.ans,c=sw_([a-2,a-1,a+1,a+2,a+3,a-3,a+4].filter(x=>x>=0&&x!==a)).slice(0,3).map(String);c.push(q.ans);return sw_(c)}
  const c=sw_(q.pool.filter(x=>x!==q.ans)).slice(0,3);c.push(q.ans);return sw_(c)}
 //ENDSHAPES
+//CHAPTERS
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),p1=a=>a[Math.floor(Math.random()*a.length)],uq=a=>[...new Set(a)];
+function mkO(ans,c,n){ans=String(ans);const x=sw_(uq(c.map(String)).filter(v=>v!==ans)).slice(0,(n||4)-1);x.push(ans);return sw_(x)}
+const mini=(s,w)=>'<span class="mini" style="width:'+(w||64)+'px">'+s+'</span>';
+const TXT='font-family="sans-serif" text-anchor="middle" fill="#2b1b5a"';
+const cs=n=>'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#f5c542" stroke="#b8860b" stroke-width="5"/><circle cx="50" cy="50" r="36" fill="none" stroke="#b8860b" stroke-width="2"/><text x="50" y="62" font-size="32" font-weight="800" font-family="sans-serif" text-anchor="middle" fill="#7a5200">₹'+n+'</text></svg>';
+const NC={10:"#74c69d",20:"#f4a261",50:"#4dabf7",100:"#c77dff"};
+const nt=n=>'<svg viewBox="0 0 160 80"><rect x="3" y="3" width="154" height="74" rx="8" fill="'+NC[n]+'" stroke="#2b1b5a" stroke-width="3"/><circle cx="30" cy="40" r="16" fill="#fff" fill-opacity=".5"/><text x="95" y="52" font-size="34" font-weight="800" '+TXT+'>₹'+n+'</text></svg>';
+const cn=n=>n>=20||(n===10&&Math.random()<.5)?nt(n):cs(n);
+function clock(h,m){let t='<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#fff" stroke="#2b1b5a" stroke-width="4"/>';
+ for(let i=1;i<=12;i++){const a=i*Math.PI/6;t+='<text x="'+(50+34*Math.sin(a)).toFixed(1)+'" y="'+(55-34*Math.cos(a)).toFixed(1)+'" font-size="11" font-weight="700" '+TXT+'>'+i+'</text>'}
+ const ha=((h%12)*30+m*.5)*Math.PI/180,ma=m*6*Math.PI/180,hd=(a,l,w,c)=>'<line x1="50" y1="50" x2="'+(50+l*Math.sin(a)).toFixed(1)+'" y2="'+(50-l*Math.cos(a)).toFixed(1)+'" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round"/>';
+ return t+hd(ha,22,5,"#e63946")+hd(ma,32,3,"#1d3557")+'<circle cx="50" cy="50" r="3" fill="#2b1b5a"/></svg>'}
+const tm=(h,m)=>(((h-1)%12+12)%12+1)+":"+String(m).padStart(2,"0");
+const DAYS=[["Monday","सोमवार"],["Tuesday","मंगलवार"],["Wednesday","बुधवार"],["Thursday","गुरुवार"],["Friday","शुक्रवार"],["Saturday","शनिवार"],["Sunday","रविवार"]];
+const MONS=[["January","जनवरी"],["February","फ़रवरी"],["March","मार्च"],["April","अप्रैल"],["May","मई"],["June","जून"],["July","जुलाई"],["August","अगस्त"],["September","सितंबर"],["October","अक्टूबर"],["November","नवंबर"],["December","दिसंबर"]];
+const dy=i=>DAYS[((i%7)+7)%7],mo=i=>MONS[((i%12)+12)%12],lb=x=>x[0]+"|"+x[1];
+const T1=()=>{const h=rnd(1,12);return{d:"e",vis:clock(h,0),txt:"Ghadi mein kitne baje hain?",spk:"घड़ी में कितने बजे हैं?",ans:tm(h,0),opts:mkO(tm(h,0),[...Array(12)].map((_,i)=>tm(i+1,0))),fx:"Badi suyi 12 par ho to poore baje hote hain."}};
+const T2=()=>{const h=rnd(1,12),m=p1([30,15,45]),a=tm(h,m);return{d:"e",vis:clock(h,m),txt:"Ghadi mein kitne baje hain?",spk:"घड़ी में कितने बजे हैं?",ans:a,opts:mkO(a,[tm(h,0),tm(h,15),tm(h,30),tm(h,45),tm(h+1,m),tm(h-1,m)]),fx:m===30?"Aadha ghanta: badi suyi 6 par, yaani 30 minute.":m===15?"Savaa: badi suyi 3 par, yaani 15 minute.":"Paune: badi suyi 9 par, yaani 45 minute."}};
+const T3=()=>{const h=rnd(1,12),m=p1([5,10,20,25,35,40,50,55]),a=tm(h,m);return{d:"m",vis:clock(h,m),txt:"Ghadi mein kitne baje hain?",spk:"घड़ी में कितने बजे हैं?",ans:a,opts:mkO(a,[tm(h,(m+5)%60),tm(h,(m+55)%60),tm(h,(m+10)%60),tm(h+1,m),tm(h-1,m)]),fx:"Badi suyi jis number par ho use 5 se guna karo: "+m/5+" × 5 = "+m+" minute."}};
+const Cal=(vis,txt,spk,ans,opts,fx,d)=>({d:d||"e",vis:vis,big:1,txt:txt,spk:spk,ans:String(ans),opts:opts,fx:fx});
+const T4=[()=>Cal("📅","Hafte mein kitne din hote hain?","हफ़्ते में कितने दिन होते हैं?",7,mkO(7,[5,6,8,10]),"Hafte mein 7 din hote hain."),
+ ()=>Cal("🗓️","Saal mein kitne mahine hote hain?","साल में कितने महीने होते हैं?",12,mkO(12,[10,11,13,7,6]),"Saal mein 12 mahine hote hain."),
+ ()=>Cal("🌞","Ek din mein kitne ghante hote hain?","एक दिन में कितने घंटे होते हैं?",24,mkO(24,[12,20,30,60]),"Din-raat milakar 24 ghante."),
+ ()=>Cal("⏱️","Ek ghante mein kitne minute hote hain?","एक घंटे में कितने मिनट होते हैं?",60,mkO(60,[30,50,100,24]),"1 ghanta = 60 minute."),
+ ()=>{const i=rnd(0,6);return Cal("📅",dy(i)[0]+" ke baad kaun sa din aata hai?",dy(i)[1]+" के बाद कौन सा दिन आता है?",lb(dy(i+1)),mkO(lb(dy(i+1)),DAYS.map(lb)),"Ravivaar ke baad phir Somvaar aata hai.")},
+ ()=>{const i=rnd(0,6);return Cal("📅",dy(i)[0]+" se pehle kaun sa din hota hai?",dy(i)[1]+" से पहले कौन सा दिन होता है?",lb(dy(i-1)),mkO(lb(dy(i-1)),DAYS.map(lb)),"Din hafte mein chakkar lagate hain.")},
+ ()=>{const i=rnd(0,6),k=rnd(2,4);return Cal("📅",dy(i)[0]+" se "+k+" din baad kaun sa din?",dy(i)[1]+" से "+k+" दिन बाद कौन सा दिन?",lb(dy(i+k)),mkO(lb(dy(i+k)),DAYS.map(lb)),"Ek-ek karke ginte jao!","m")},
+ ()=>{const i=rnd(0,11);return Cal("🗓️",mo(i)[0]+" ke baad kaun sa mahina aata hai?",mo(i)[1]+" के बाद कौन सा महीना आता है?",lb(mo(i+1)),mkO(lb(mo(i+1)),MONS.map(lb)),"December ke baad phir January aata hai.","m")},
+ ()=>{const i=rnd(0,11);return Cal("🗓️",mo(i)[0]+" se pehle kaun sa mahina hota hai?",mo(i)[1]+" से पहले कौन सा महीना होता है?",lb(mo(i-1)),mkO(lb(mo(i-1)),MONS.map(lb)),"Mahine bhi chakkar lagate hain.","m")}];
+const T5=()=>{const h=rnd(1,12),m=p1([0,30]),dl=p1([["30 minute baad",30,"30 मिनट बाद"],["1 ghanta baad",60,"1 घंटा बाद"],["2 ghante baad",120,"2 घंटे बाद"],["1 ghanta pehle",-60,"1 घंटा पहले"]]),t=(((h%12)*60+m+dl[1])%720+720)%720,a=tm(Math.floor(t/60),t%60);
+ return{d:"h",vis:clock(h,m),txt:"Abhi "+tm(h,m)+" baje hain. "+dl[0]+" kitne baje honge?",spk:"अभी "+tm(h,m)+" बजे हैं। "+dl[2]+" कितने बजे होंगे?",ans:a,opts:mkO(a,[tm(h,m),tm(h+1,m),tm(h-1,m),tm(h+2,m),tm(h,(m+30)%60)]),fx:"Ghadi ko aage-peeche ghumakar sochho!"}};
+const amt=n=>"₹"+n,PR=[["✏️","Pencil","पेंसिल"],["🍬","Toffee","टॉफी"],["🍎","Seb","सेब"],["🍪","Biscuit","बिस्किट"],["🎈","Gubbara","गुब्बारा"],["🍦","Ice cream","आइसक्रीम"],["🍫","Chocolate","चॉकलेट"],["🥭","Aam","आम"]];
+const near=(a,k)=>[a+1,a-1,a+2,a-2,a+5,a-5,a+10].filter(x=>x>=0);
+const M1=()=>{const n=p1([1,2,5,10,20,50,100]);return{d:"e",vis:n>=20?mini(nt(n),150):mini(cn(n),n===10?110:110),txt:"Ye kitne rupaye ka hai?",spk:"ये कितने रुपये का है?",ans:amt(n),opts:mkO(amt(n),[1,2,5,10,20,50,100].map(amt)),fx:"Sikke aur note alag-alag rupaye ke hote hain."}};
+const M2=()=>{const k=rnd(2,4),a=[];let t=0;for(let i=0;i<k;i++){const v=p1([1,2,5,10,20]);a.push(v);t+=v}if(t>60)return M2();
+ return{d:"m",vis:a.map(v=>mini(cn(v),v>=20?90:62)).join(""),txt:"Kul kitne rupaye hue?",spk:"कुल कितने रुपये हुए?",ans:amt(t),opts:mkO(amt(t),near(t).map(amt)),fx:"Sab ko jodo: "+a.join(" + ")+" = "+t}};
+const M3=()=>{const[a,b]=sw_(PR.slice()),p=rnd(2,12),q=rnd(2,12);return{d:"m",vis:a[0]+' <b>₹'+p+'</b> &nbsp; '+b[0]+' <b>₹'+q+'</b>',txt:a[1]+" ₹"+p+" ki aur "+b[1]+" ₹"+q+" ki. Dono ke kul kitne?",spk:a[2]+" "+p+" रुपये की और "+b[2]+" "+q+" रुपये की। दोनों के कुल कितने?",ans:amt(p+q),opts:mkO(amt(p+q),near(p+q).map(amt)),fx:p+" + "+q+" = "+(p+q)}};
+const M3b=()=>{const a=p1(PR),p=rnd(2,9),k=rnd(2,4);return{d:"m",vis:a[0].repeat(k),txt:"Ek "+a[1]+" ₹"+p+" ka hai. "+k+" "+a[1]+" ke kitne rupaye?",spk:"एक "+a[2]+" "+p+" रुपये का है। "+k+" के कितने रुपये?",ans:amt(p*k),opts:mkO(amt(p*k),near(p*k).map(amt)),fx:k+" × "+p+" = "+p*k}};
+const M4=()=>{const pd=p1([10,20,50]),c=rnd(2,pd-1),a=p1(PR);return{d:"m",vis:a[0],big:1,txt:"₹"+pd+" ka note diya. "+a[1]+" ₹"+c+" ki hai. Kitne rupaye wapas aayenge?",spk:pd+" रुपये का नोट दिया। "+a[2]+" "+c+" रुपये की है। कितने रुपये वापस आएँगे?",ans:amt(pd-c),opts:mkO(amt(pd-c),near(pd-c).map(amt)),fx:"Wapas = diya hua − daam: "+pd+" − "+c+" = "+(pd-c)}};
+const M5=[()=>{const a=rnd(2,30);let b=rnd(2,30);if(a===b)b++;const[x,y]=sw_(PR.slice());return{d:"m",vis:x[0]+' <b>₹'+a+'</b> &nbsp; '+y[0]+' <b>₹'+b+'</b>',txt:"Kaun sasta hai?",spk:"कौन सस्ता है?",ans:a<b?x[1]:y[1],opts:[x[1],y[1]],fx:"Kam rupaye wala sasta hota hai."}},
+ ()=>{const t=p1([20,30,40,50]),a=rnd(3,12),b=rnd(3,12);return{d:"h",vis:"💰",big:1,txt:"₹"+t+" mein ₹"+a+" aur ₹"+b+" ki cheezein kharidi. Kitne rupaye bache?",spk:t+" रुपये में "+a+" और "+b+" रुपये की चीज़ें खरीदीं। कितने रुपये बचे?",ans:amt(t-a-b),opts:mkO(amt(t-a-b),near(t-a-b).map(amt)),fx:t+" − "+a+" − "+b+" = "+(t-a-b)}},
+ ()=>{const c=p1([2,5]),k=rnd(2,6),t=c*k;return{d:"h",vis:"🪙",big:1,txt:"₹"+t+" mein ₹"+c+" ke kitne sikke aate hain?",spk:t+" रुपये में "+c+" रुपये के कितने सिक्के आते हैं?",ans:String(k),opts:mkO(k,[k+1,k-1,k+2,k-2,k*2].filter(x=>x>0)),fx:t+" ÷ "+c+" = "+k}}];
+const nn=x=>'<span class="nn">'+x+'</span>';
+const N1=()=>{const a=rnd(10,99);let b;do{b=rnd(10,99)}while(b===a);const g=Math.random()<.5;return{d:"e",vis:nn(a)+nn(b),txt:g?"Kaun sa number bada hai?":"Kaun sa number chhota hai?",spk:g?"कौन सा नंबर बड़ा है?":"कौन सा नंबर छोटा है?",ans:String(g?Math.max(a,b):Math.min(a,b)),opts:[String(a),String(b)],fx:"Pehle dahai (tens) dekho. Jiska tens bada, wo number bada!"}};
+const N1b=()=>{const a=rnd(10,99);let b=rnd(10,99);if(Math.random()<.15)b=a;const s=a>b?">":a<b?"<":"=";return{d:"e",vis:nn(a)+nn("❓")+nn(b),txt:"Sahi chinh kaunsa lagega?",spk:"सही चिह्न कौन सा लगेगा?",ans:s,opts:["<",">","="],fx:"> ka matlab bada, < ka matlab chhota, = ka matlab barabar."}};
+const N2=()=>{const n=rnd(11,98),t=rnd(0,2);if(t===0)return{d:"e",vis:nn(n),txt:n+" ke baad kaun sa number aata hai?",spk:n+" के बाद कौन सा नंबर आता है?",ans:String(n+1),opts:mkO(n+1,[n-1,n+2,n+10,n-2,n]),fx:"Baad wala number = 1 zyada."};
+ if(t===1)return{d:"e",vis:nn(n),txt:n+" se pehle kaun sa number aata hai?",spk:n+" से पहले कौन सा नंबर आता है?",ans:String(n-1),opts:mkO(n-1,[n+1,n-2,n-10,n+2,n]),fx:"Pehle wala number = 1 kam."};
+ return{d:"m",vis:nn(n-1)+nn("❓")+nn(n+1),txt:(n-1)+" aur "+(n+1)+" ke beech mein kaun sa number?",spk:(n-1)+" और "+(n+1)+" के बीच में कौन सा नंबर?",ans:String(n),opts:mkO(n,[n-2,n+2,n+1,n-1,n+10]),fx:"Beech wala number: "+(n-1)+", "+n+", "+(n+1)}};
+const N3=()=>{const n=rnd(11,99),t=n%10===0?1:rnd(0,2);if(t===0)return{d:"e",vis:mini(blocks(n),260),txt:"Kul kitne hain?",spk:"कुल कितने हैं?",ans:String(n),opts:mkO(n,[n+1,n-1,n+10,n-10,(n%10)*10+Math.floor(n/10)]),fx:"Lambi patti = 10 (dahai), chhote dibbe = 1 (ikai)."};
+ if(t===1)return{d:"m",vis:mini(blocks(n),260),txt:n+" mein dahai (tens) ka ank kaunsa hai?",spk:n+" में दहाई का अंक कौन सा है?",ans:String(Math.floor(n/10)),opts:mkO(Math.floor(n/10),[n%10,Math.floor(n/10)+1,Math.floor(n/10)-1,9,5,3]),fx:"Pehla ank dahai (tens) hota hai."};
+ return{d:"m",vis:mini(blocks(n),260),txt:n+" mein ikai (ones) ka ank kaunsa hai?",spk:n+" में इकाई का अंक कौन सा है?",ans:String(n%10),opts:mkO(n%10,[Math.floor(n/10),(n%10+1)%10,(n%10+2)%10,(n%10+9)%10,4,7]),fx:"Aakhri ank ikai (ones) hota hai."}};
+const N4=()=>{const s=p1([2,5,10,3,4]),a=s*rnd(1,5),q=[a,a+s,a+2*s,a+3*s],r=a+4*s;return{d:"m",vis:q.map(nn).join(",")+nn("❓"),txt:s+"-"+s+" ki ginti: agla number kaunsa?",spk:s+"-"+s+" की गिनती, अगला नंबर कौन सा?",ans:String(r),opts:mkO(r,[r+1,r-1,r+s,r-s,r+2]),fx:"Har baar "+s+" jodte jao."}};
+const N5=[()=>{const o=Math.random()<.5,a=uq([rnd(10,99),rnd(10,99),rnd(10,99),rnd(10,99),rnd(10,99)]).slice(0,4);const ok=a.filter(x=>(x%2===0)===o);if(ok.length!==1)return N5[0]();return{d:"m",vis:"",txt:o?"Inme se kaun sa number even (jod) hai?":"Inme se kaun sa number odd (bejod) hai?",spk:o?"इनमें से कौन सा नंबर सम है?":"इनमें से कौन सा नंबर विषम है?",ans:String(ok[0]),opts:a.map(String),fx:"Even: 0, 2, 4, 6, 8 par khatam. Odd: 1, 3, 5, 7, 9 par."}},
+ ()=>{const a=uq([rnd(10,99),rnd(10,99),rnd(10,99),rnd(10,99)]);if(a.length<4)return N5[1]();const g=Math.random()<.5;return{d:"m",vis:"",txt:g?"Inme sabse bada number kaunsa hai?":"Inme sabse chhota number kaunsa hai?",spk:g?"इनमें सबसे बड़ा नंबर कौन सा है?":"इनमें सबसे छोटा नंबर कौन सा है?",ans:String(g?Math.max(...a):Math.min(...a)),opts:a.map(String),fx:"Pehle tens dekho, phir ones."}},
+ ()=>{const a=sw_(uq([rnd(10,99),rnd(10,99),rnd(10,99)]));if(a.length<3)return N5[2]();const s=[...a].sort((x,y)=>x-y),r=s.join(", "),wr=[[s[1],s[0],s[2]],[s[2],s[1],s[0]],[s[1],s[2],s[0]]].map(x=>x.join(", "));return{d:"h",vis:a.map(nn).join(""),txt:"Chhote se bade ka sahi kram kaunsa hai?",spk:"छोटे से बड़े का सही क्रम कौन सा है?",ans:r,opts:mkO(r,wr),fx:"Sabse chhota pehle, sabse bada aakhir mein."}},
+ ()=>{const n=rnd(101,999),h=Math.floor(n/100);return{d:"h",vis:nn(n),txt:n+" mein sau (hundreds) ka ank kaunsa hai?",spk:n+" में सैकड़े का अंक कौन सा है?",ans:String(h),opts:mkO(h,[Math.floor(n/10)%10,n%10,h+1,h-1].filter(x=>x>=0)),fx:"3 ank wale number mein pehla ank sau (hundreds) hota hai."}}];
+function blocks(n){const t=Math.floor(n/10),o=n%10;let s='<svg viewBox="0 0 '+(t*18+86)+' 80">';
+ for(let i=0;i<t;i++){s+='<rect x="'+(4+i*18)+'" y="6" width="12" height="68" fill="#4dabf7" stroke="#2b1b5a" stroke-width="2"/>';for(let j=1;j<10;j++)s+='<line x1="'+(4+i*18)+'" y1="'+(6+j*6.8).toFixed(1)+'" x2="'+(16+i*18)+'" y2="'+(6+j*6.8).toFixed(1)+'" stroke="#2b1b5a" stroke-width="1"/>'}
+ for(let k=0;k<o;k++)s+='<rect x="'+(t*18+14+(k%5)*14)+'" y="'+(10+Math.floor(k/5)*18)+'" width="12" height="12" fill="#ffa94d" stroke="#2b1b5a" stroke-width="1.5"/>';
+ return s+'</svg>'}
+function ruler(n){const e=10+n*20;let s='<svg viewBox="0 0 330 100"><rect x="10" y="8" width="'+(n*20-14)+'" height="26" rx="4" fill="#ffd43b" stroke="#2b1b5a" stroke-width="2.5"/><polygon points="'+(e-14)+',8 '+e+',21 '+(e-14)+',34" fill="#f4a261" stroke="#2b1b5a" stroke-width="2.5"/><rect x="2" y="48" width="326" height="44" rx="5" fill="#d0ebff" stroke="#2b1b5a" stroke-width="2.5"/>';
+ for(let i=0;i<=15;i++)s+='<line x1="'+(10+i*20)+'" y1="48" x2="'+(10+i*20)+'" y2="'+(i%5===0?68:62)+'" stroke="#2b1b5a" stroke-width="2"/><text x="'+(10+i*20)+'" y="85" font-size="11" '+TXT+'>'+i+'</text>';
+ return s+'</svg>'}
+const HV=[["🐘","Haathi","हाथी","🐁","Chuha","चूहा"],["🚌","Bus","बस","🚲","Cycle","साइकिल"],["🍉","Tarbooz","तरबूज़","🍓","Strawberry","स्ट्रॉबेरी"],["🐄","Gaay","गाय","🐇","Khargosh","खरगोश"],["🏍️","Bike","बाइक","⚽","Football","फुटबॉल"]];
+const LG=[["🦒","Giraffe","जिराफ़","🐢","Kachua","कछुआ"],["🌳","Ped","पेड़","🌼","Phool","फूल"],["🚂","Train","रेलगाड़ी","🚗","Car","कार"],["🏢","Building","इमारत","🏠","Ghar","घर"],["🐍","Saanp","साँप","🐜","Cheenti","चींटी"]];
+const M_1=()=>{const hv=Math.random()<.5,x=p1(hv?HV:LG),w=Math.random()<.5,big=hv?w:w,tx=hv?(w?"bhaari":"halka"):(w?"lamba":"chhota"),sp=hv?(w?"भारी":"हल्का"):(w?"लंबा":"छोटा"),a=big?lb2(x,0):lb2(x,1),sw=Math.random()<.5;
+ return{d:"e",vis:(sw?x[0]+" ⚖️ "+x[3]:x[3]+" ⚖️ "+x[0]),big:1,txt:"Kaun sa "+tx+" hai?",spk:"कौन सा "+sp+" है?",ans:a,opts:[lb2(x,0),lb2(x,1)],fx:hv?"Bhaari cheez ka wazan zyada hota hai.":"Lamba matlab zyada lambai."}};
+const lb2=(x,k)=>k===0?x[1]+"|"+x[2]:x[4]+"|"+x[5];
+const M_2=()=>{const n=rnd(2,14);return{d:"e",vis:ruler(n),txt:"Pencil kitne cm lambi hai?",spk:"पेंसिल कितने सेंटीमीटर लंबी है?",ans:n+" cm",opts:mkO(n+" cm",[n+1,n-1,n+2,n-2].filter(x=>x>0).map(x=>x+" cm")),fx:"Ruler par 0 se shuru karke pencil ka siraa dekho: "+n+" cm."}};
+const UN=[["✏️","Pencil ki lambai","पेंसिल की लंबाई","cm"],["🍉","Tarbooz ka wazan","तरबूज़ का वज़न","kg"],["🥛","Doodh ki matra","दूध की मात्रा","litre"],["🛣️","Delhi se Jaipur ka raasta","दिल्ली से जयपुर का रास्ता","km"],["🍬","Toffee ka wazan","टॉफी का वज़न","g"],["🪣","Bucket ka paani","बाल्टी का पानी","litre"],["🚪","Darwaze ki unchai","दरवाज़े की ऊँचाई","m"],["🍎","Ek seb ka wazan","एक सेब का वज़न","g"],["🐘","Haathi ka wazan","हाथी का वज़न","kg"],["🚂","Train ki lambai","रेलगाड़ी की लंबाई","m"]];
+const M_3=()=>{const u=p1(UN);return{d:"m",vis:u[0],big:1,txt:u[1]+" kisme napte hain?",spk:u[2]+" किसमें नापते हैं?",ans:u[3],opts:mkO(u[3],["cm","m","km","g","kg","litre"]),fx:"Chhoti lambai: cm, badi: m, bahut badi: km. Wazan: g aur kg. Paani/doodh: litre."}};
+const M_4=()=>{const u=p1([["kg","किलो"],["litre","लीटर"],["m","मीटर"],["cm","सेंटीमीटर"]]),a=rnd(1,9),b=rnd(1,9),add=Math.random()<.5||a<=b,r=add?a+b:a-b,e=add?"+":"−";return{d:"m",vis:'<span class="nn">'+a+" "+u[0]+" "+e+" "+b+" "+u[0]+'</span>',txt:"Kitna hua?",spk:a+" "+u[1]+" "+(add?"जमा":"घटा")+" "+b+" "+u[1]+" कितना हुआ?",ans:r+" "+u[0],opts:mkO(r+" "+u[0],near(r).filter(x=>x>=0).map(x=>x+" "+u[0])),fx:"Ikai ek jaisi ho to seedha jodo ya ghatao."}};
+const M_5=[()=>({d:"h",vis:"📏",big:1,txt:"1 meter mein kitne cm hote hain?",spk:"1 मीटर में कितने सेंटीमीटर होते हैं?",ans:"100",opts:mkO(100,[10,50,1000,60]),fx:"1 m = 100 cm."}),
+ ()=>({d:"h",vis:"⚖️",big:1,txt:"1 kg mein kitne gram hote hain?",spk:"1 किलो में कितने ग्राम होते हैं?",ans:"1000",opts:mkO(1000,[100,500,10,60]),fx:"1 kg = 1000 g."}),
+ ()=>({d:"h",vis:"🥛",big:1,txt:"1 litre mein kitne ml hote hain?",spk:"1 लीटर में कितने मिलीलीटर होते हैं?",ans:"1000",opts:mkO(1000,[100,500,10,60]),fx:"1 litre = 1000 ml."}),
+ ()=>({d:"h",vis:"📏",big:1,txt:"Kaunsa lamba hai: 1 m ya 50 cm?",spk:"कौन सा लंबा है: 1 मीटर या 50 सेंटीमीटर?",ans:"1 m",opts:["1 m","50 cm"],fx:"1 m = 100 cm, to 1 m bada hai.",}),
+ ()=>({d:"h",vis:"⚖️",big:1,txt:"Kaunsa bhaari hai: 1 kg ya 500 g?",spk:"कौन सा भारी है: 1 किलो या 500 ग्राम?",ans:"1 kg",opts:["1 kg","500 g"],fx:"1 kg = 1000 g, to 1 kg bhaari hai."})];
+const EM=[["🍫","Chocolate","चॉकलेट"],["🍎","Seb","सेब"],["🍪","Biscuit","बिस्किट"],["🍬","Toffee","टॉफी"],["🎈","Gubbare","गुब्बारे"]];
+const DV1=()=>{const k=rnd(2,5),m=rnd(1,5),N=k*m,e=p1(EM);return{d:"e",vis:e[0].repeat(N)+"<br>"+"🍽️".repeat(k),txt:N+" "+e[1]+" "+k+" plate mein barabar baante. Ek plate mein kitne?",spk:N+" "+e[2]+" "+k+" प्लेट में बराबर बाँटे। एक प्लेट में कितने?",ans:String(m),opts:mkO(m,[m+1,m-1,m+2,N,k].filter(x=>x>0)),fx:N+" ÷ "+k+" = "+m}};
+const DV2=()=>{const k=rnd(2,5),m=rnd(2,6),N=k*m,e=p1(EM);return{d:"e",vis:"👧".repeat(k)+"<br>"+e[0].repeat(N),txt:N+" "+e[1]+" "+k+" doston mein barabar baante. Har dost ko kitne?",spk:N+" "+e[2]+" "+k+" दोस्तों में बराबर बाँटे। हर दोस्त को कितने?",ans:String(m),opts:mkO(m,[m+1,m-1,m+2,k,N].filter(x=>x>0)),fx:"Barabar baantna matlab bhaag (÷)."}};
+const DV3=()=>{const m=p1([2,3,4,5]),k=rnd(2,6),N=m*k,e=p1(EM);return{d:"m",vis:e[0].repeat(N),txt:N+" "+e[1]+" hain. Ek tokri mein "+m+" rakhne hain. Kitni tokri chahiye?",spk:N+" "+e[2]+" हैं। एक टोकरी में "+m+" रखने हैं। कितनी टोकरी चाहिए?",ans:String(k),opts:mkO(k,[k+1,k-1,k+2,m,N].filter(x=>x>0)),fx:N+" ÷ "+m+" = "+k}};
+const DV4=[()=>{const a=rnd(2,5),b=rnd(2,10),N=a*b;return{d:"m",vis:nn(N+" ÷ "+a+" = ❓"),txt:N+" ÷ "+a+" kitna hota hai?",spk:N+" भाग "+a+" कितना होता है?",ans:String(b),opts:mkO(b,[b+1,b-1,b+2,b-2,a].filter(x=>x>0)),fx:a+" × "+b+" = "+N+", to "+N+" ÷ "+a+" = "+b}},
+ ()=>{const a=rnd(2,6),b=rnd(2,9),N=a*b;return{d:"m",vis:nn(a+" × ❓ = "+N),txt:a+" × kitna = "+N+"?",spk:a+" गुणा कितना बराबर "+N+"?",ans:String(b),opts:mkO(b,[b+1,b-1,b+2,b-2].filter(x=>x>0)),fx:"Table yaad karo: "+a+" ka "+b+" = "+N}}];
+const DV5=[()=>{const a=rnd(2,9),b=rnd(2,9),N=a*b;return{d:"h",vis:nn(a+" × "+b+" = "+N),txt:N+" ÷ "+a+" kitna hota hai?",spk:N+" भाग "+a+" कितना होता है?",ans:String(b),opts:mkO(b,[b+1,b-1,a,N,b+2].filter(x=>x>0)),fx:"Guna aur bhaag ek doosre ke ulte hain."}},
+ ()=>{const a=rnd(2,5),N=a*rnd(4,10);return{d:"h",vis:nn(N+" ÷ "+a),txt:N+" ÷ "+a+" = ?",spk:N+" भाग "+a+" बराबर कितना?",ans:String(N/a),opts:mkO(N/a,[N/a+1,N/a-1,N/a+2,a,N/a*2]),fx:"Table se dhundho: "+a+" × "+N/a+" = "+N}},
+ ()=>{const a=rnd(2,5),N=a*rnd(5,10),k=p1([2,5,10]);return{d:"h",vis:"🎒",big:1,txt:N+" kitabein "+a+" bachchon mein barabar baanti. Ek bachche ko kitni mili?",spk:N+" किताबें "+a+" बच्चों में बराबर बाँटीं। एक बच्चे को कितनी मिलीं?",ans:String(N/a),opts:mkO(N/a,[N/a+1,N/a-1,N/a+2,a]),fx:N+" ÷ "+a+" = "+N/a}}];
+const SETS_=[["🔴","🔵","🟡","🟢"],["🍎","🍌","🍇","🍓"],["⭐","🌙","☀️","☁️"],["🐶","🐱","🐭","🐰"]];
+const PT1=()=>{const s=sw_(p1(SETS_).slice()),a=s[0],b=s[1],seq=[a,b,a,b,a],r=b;return{d:"e",vis:seq.join(" ")+" ❓",mid:1,txt:"Agla kaunsa aayega?",spk:"अगला कौन सा आएगा?",ans:r,opts:[a,b,s[2],s[3]],fx:"Pattern: "+a+" "+b+" baar-baar doharta hai."}};
+const PT2=()=>{const s=p1([2,3,4,5,10]),a=rnd(1,6)*(s>5?1:1),q=[a,a+s,a+2*s,a+3*s],r=a+4*s;return{d:"e",vis:q.map(nn).join(",")+nn("❓"),txt:"Pattern ka agla number kaunsa?",spk:"पैटर्न का अगला नंबर कौन सा है?",ans:String(r),opts:mkO(r,[r+1,r-1,r+s,r-s,r+2]),fx:"Har baar "+s+" badhta hai."}};
+const PT3=()=>{const s=p1([1,2,5,10]),a=s*rnd(5,9),q=[a,a-s,a-2*s,a-3*s],r=a-4*s;return{d:"m",vis:q.map(nn).join(",")+nn("❓"),txt:"Ulti ginti: agla number kaunsa?",spk:"उल्टी गिनती, अगला नंबर कौन सा?",ans:String(r),opts:mkO(r,[r+1,r-1,r+s,r+2,r-2].filter(x=>x>=0)),fx:"Har baar "+s+" ghatta hai."}};
+const PT4=()=>{const s=sw_(p1(SETS_).slice()),a=s[0],b=s[1],c=s[2],t=Math.random()<.5,seq=t?[a,a,b,a,a,b,a,a]:[a,b,c,a,b,c,a,b],r=t?b:c;return{d:"m",vis:seq.join(" ")+" ❓",mid:1,txt:"Agla kaunsa aayega?",spk:"अगला कौन सा आएगा?",ans:r,opts:[a,b,c,s[3]],fx:t?"Pattern: "+a+a+b+" doharta hai.":"Pattern: "+a+b+c+" doharta hai."}};
+const PT5=[()=>{const a=p1([1,2,3]),q=[a,a*2,a*4,a*8],r=a*16;return{d:"h",vis:q.map(nn).join(",")+nn("❓"),txt:"Har number pichhle ka double hai. Agla kaunsa?",spk:"हर नंबर पिछले का दुगना है। अगला कौन सा?",ans:String(r),opts:mkO(r,[r/2,r+a,r-a,r*2]),fx:"Double matlab 2 se guna."}},
+ ()=>{const s=sw_(p1(SETS_).slice()),a=s[0],b=s[1],n=rnd(0,3),L=[a,a,a,a];L[n]=b;return{d:"h",vis:L.join(" "),mid:1,txt:"Inme alag kaun hai?",spk:"इनमें अलग कौन है?",ans:b,opts:[a,b],fx:"Jo baaki sab se alag dikhe, wahi alag hai."}},
+ ()=>{const a=rnd(1,5),b=p1([2,3]),q=[a,a+b,a,a+b,a],r=a+b;return{d:"h",vis:q.map(nn).join(",")+nn("❓"),txt:"Agla number kaunsa?",spk:"अगला नंबर कौन सा?",ans:String(r),opts:mkO(r,[a,r+1,r-1,r+b]),fx:"Do number baari-baari se aate hain."}}];
+const COL=["#ff6b6b","#4dabf7","#51cf66","#ffa94d","#cc5de8"];
+const FR=["🍎","🍌","🍇","🍓","🍪","🍬"];
+const DA1=()=>{const f=sw_(FR.slice()),a=f[0],b=f[1],x=rnd(2,8),y=rnd(2,8),L=sw_([...Array(x).fill(a),...Array(y).fill(b)]);return{d:"e",vis:L.join(" "),txt:"Kitne "+a+" hain?",spk:"कितने "+a+" हैं?",ans:String(x),opts:mkO(x,[x+1,x-1,x+2,x-2,y].filter(v=>v>0)),fx:"Ek-ek karke ginti karo."}};
+function tally(n){let s='<svg viewBox="0 0 '+(Math.ceil(n/5)*60+10)+' 60">',x=10;for(let g=0;g<n;g+=5){const c=Math.min(5,n-g);for(let k=0;k<Math.min(c,4);k++)s+='<line x1="'+(x+k*10)+'" y1="8" x2="'+(x+k*10)+'" y2="52" stroke="#2b1b5a" stroke-width="4" stroke-linecap="round"/>';if(c===5)s+='<line x1="'+(x-6)+'" y1="44" x2="'+(x+40)+'" y2="14" stroke="#e63946" stroke-width="4" stroke-linecap="round"/>';x+=60}return s+'</svg>'}
+const DA2=()=>{const n=rnd(3,17);return{d:"e",vis:'<span class="wide">'+tally(n)+'</span>',txt:"Tally marks mein kitna ginti hai?",spk:"टैली मार्क्स में कितनी गिनती है?",ans:String(n),opts:mkO(n,[n+1,n-1,n+2,n-2,n+5].filter(v=>v>0)),fx:"4 line aur ek tirchhi line = 5."}};
+function pic(c,v){return c.map((e,i)=>'<div class="row">'+e+' : '+(e+" ").repeat(v[i])+'</div>').join("")}
+function distinct(k,lo,hi){const s=new Set();while(s.size<k)s.add(rnd(lo,hi));return[...s]}
+const DA3=()=>{const k=rnd(3,4),c=sw_(FR.slice()).slice(0,k),v=distinct(k,1,7),t=rnd(0,2);let q;
+ if(t===0){const i=v.indexOf(Math.max(...v));q=["Kiske sabse zyada hain?","किसके सबसे ज़्यादा हैं?",c[i],c,"Jiski line sabse lambi, wahi sabse zyada."]}
+ else if(t===1){const i=v.indexOf(Math.min(...v));q=["Kiske sabse kam hain?","किसके सबसे कम हैं?",c[i],c,"Jiski line sabse chhoti, wahi sabse kam."]}
+ else{const i=rnd(0,k-1);q=["Kitne "+c[i]+" hain?","कितने "+c[i]+" हैं?",String(v[i]),null,"Line mein ginti karo."]}
+ return{d:"m",vis:pic(c,v),txt:q[0],spk:q[1],ans:q[2],opts:q[3]?q[3].slice():mkO(q[2],[+q[2]+1,+q[2]-1,+q[2]+2,+q[2]-2].filter(x=>x>0)),fx:q[4]}};
+function bars(cats,vals,ymax){let s='<svg viewBox="0 0 300 175">';for(let v=0;v<=ymax;v+=2){const y=140-v*(120/ymax);s+='<line x1="30" y1="'+y+'" x2="295" y2="'+y+'" stroke="#d0c8f0"/><text x="24" y="'+(y+4)+'" font-size="11" text-anchor="end" fill="#2b1b5a" font-family="sans-serif">'+v+'</text>'}
+ const w=255/cats.length;cats.forEach((c,i)=>{const h=vals[i]*(120/ymax);s+='<rect x="'+(40+i*w+8)+'" y="'+(140-h)+'" width="'+(w-16)+'" height="'+h+'" rx="4" fill="'+COL[i%5]+'" stroke="#2b1b5a" stroke-width="2"/><text x="'+(40+i*w+w/2)+'" y="166" font-size="20" text-anchor="middle">'+c+'</text>'});return s+'</svg>'}
+const barQ=()=>{const k=rnd(3,4),c=sw_(FR.slice()).slice(0,k),v=distinct(k,1,9),ym=v.some(x=>x>8)?10:8;return{c,v,ym,vis:'<span class="wide">'+bars(c,v,ym)+'</span>'}};
+const DA4=()=>{const b=barQ(),t=rnd(0,2);let q;
+ if(t===0){const i=rnd(0,b.c.length-1);q=["Kitne "+b.c[i]+" hain?","कितने "+b.c[i]+" हैं?",String(b.v[i]),null,"Bar ki unchai dekho aur number padho."]}
+ else if(t===1){const i=b.v.indexOf(Math.max(...b.v));q=["Kiske sabse zyada hain?","किसके सबसे ज़्यादा हैं?",b.c[i],b.c,"Sabse oonchi bar sabse zyada."]}
+ else{const i=b.v.indexOf(Math.min(...b.v));q=["Kiske sabse kam hain?","किसके सबसे कम हैं?",b.c[i],b.c,"Sabse chhoti bar sabse kam."]}
+ return{d:"m",vis:b.vis,txt:q[0],spk:q[1],ans:q[2],opts:q[3]?q[3].slice():mkO(q[2],[+q[2]+1,+q[2]-1,+q[2]+2,+q[2]-2].filter(x=>x>0)),fx:q[4]}};
+const DA5=[()=>{const b=barQ(),tot=b.v.reduce((x,y)=>x+y,0);return{d:"h",vis:b.vis,txt:"Sab milakar kul kitne hain?",spk:"सब मिलाकर कुल कितने हैं?",ans:String(tot),opts:mkO(tot,[tot+1,tot-1,tot+2,tot-2,tot+3]),fx:"Sab bars ke number jodo: "+b.v.join(" + ")+" = "+tot}},
+ ()=>{const b=barQ(),i=0,j=1,hi=Math.max(b.v[i],b.v[j]),lo=Math.min(b.v[i],b.v[j]);return{d:"h",vis:b.vis,txt:b.c[i]+" aur "+b.c[j]+" mein kitna antar (zyada) hai?",spk:b.c[i]+" और "+b.c[j]+" में कितना अंतर है?",ans:String(hi-lo),opts:mkO(hi-lo,[hi-lo+1,hi-lo+2,Math.abs(hi-lo-1),hi+lo,hi]),fx:"Bade number mein se chhota ghatao: "+hi+" − "+lo+" = "+(hi-lo)}},
+ ()=>{const k=rnd(3,4),c=sw_(FR.slice()).slice(0,k),v=distinct(k,1,7),tot=v.reduce((x,y)=>x+y,0);return{d:"h",vis:pic(c,v),txt:"Sab milakar kul kitne phal/cheezein hain?",spk:"सब मिलाकर कुल कितनी चीज़ें हैं?",ans:String(tot),opts:mkO(tot,[tot+1,tot-1,tot+2,tot-2,tot+3]),fx:"Har line ginke jodo: "+v.join(" + ")+" = "+tot}}];
+function pie(n,k,col){let s='<svg viewBox="0 0 100 100">';for(let i=0;i<n;i++){const a0=-Math.PI/2+i*2*Math.PI/n,a1=-Math.PI/2+(i+1)*2*Math.PI/n,p=(a,r)=>(50+r*Math.cos(a)).toFixed(2)+" "+(50+r*Math.sin(a)).toFixed(2);s+='<path d="M50 50 L'+p(a0,44)+' A44 44 0 0 1 '+p(a1,44)+' Z" fill="'+(i<k?(col||"#ff6b6b"):"#fff3bf")+'" stroke="#2b1b5a" stroke-width="2.5" stroke-linejoin="round"/>'}return s+'</svg>'}
+function rectf(n,k,col){let s='<svg viewBox="0 0 100 60">';const w=92/n;for(let i=0;i<n;i++)s+='<rect x="'+(4+i*w)+'" y="8" width="'+w+'" height="44" fill="'+(i<k?(col||"#4dabf7"):"#fff3bf")+'" stroke="#2b1b5a" stroke-width="2.5"/>';return s+'</svg>'}
+const FN={"1/2":"आधा","1/3":"एक तिहाई","2/3":"दो तिहाई","1/4":"एक चौथाई","3/4":"तीन चौथाई"},FL=Object.keys(FN),fo=f=>f+"|"+FN[f];
+const fx_=f=>fo(f);
+const frQ=(n,k,d)=>{const f=k+"/"+n,sh=Math.random()<.5?pie(n,k):rectf(n,k);return{d,vis:mini(sh,150),txt:"Kitna hissa rang-bhara (shade) hai?",spk:"कितना हिस्सा रंगा हुआ है?",ans:fo(f),opts:mkO(fo(f),FL.map(fo)),fx:f+" matlab "+n+" barabar hisson mein se "+k+" hisse."}};
+const F1=()=>frQ(2,1,"e");
+const F2=()=>{const t=p1([[4,1],[4,3],[3,1],[3,2]]);return frQ(t[0],t[1],"m")};
+const F3=()=>{const n=rnd(2,8),k=rnd(1,n-1),t=Math.random()<.5;return{d:"m",vis:mini(Math.random()<.5?pie(n,k):rectf(n,k),150),txt:t?"Ye kitne barabar hisson mein bata hai?":"Kitne hisse rang-bhare hain?",spk:t?"ये कितने बराबर हिस्सों में बँटा है?":"कितने हिस्से रंगे हुए हैं?",ans:String(t?n:k),opts:mkO(t?n:k,[n+1,n-1,k+1,k-1,n+2].filter(x=>x>0)),fx:"Total hisse neeche (denominator), rang-bhare hisse upar (numerator)."}};
+const F4=()=>{const a=p1(["1/2","1/3","1/4"]),b=p1(["1/2","1/3","1/4","3/4"].filter(x=>x!==a)),v=x=>x.split("/")[0]/x.split("/")[1],pr=x=>{const[k,n]=x.split("/").map(Number);return mini(pie(n,k),110)},g=Math.random()<.5,top=v(a)>v(b)?a:b,bot=v(a)>v(b)?b:a;
+ return{d:"h",vis:pr(a)+" ⚖️ "+pr(b),txt:g?"Kiska hissa bada hai?":"Kiska hissa chhota hai?",spk:g?"किसका हिस्सा बड़ा है?":"किसका हिस्सा छोटा है?",ans:fo(g?top:bot),opts:[fo(a),fo(b)],fx:"Jitne zyada tukde karoge, har tukda utna chhota hota hai."}};
+const F5=[()=>{const e=p1(EM),k=p1([2,3,4]),m=rnd(2,5),N=k*m,nm={2:"aadha",3:"ek tihai",4:"ek chauthai"},sp={2:"आधा",3:"एक तिहाई",4:"एक चौथाई"};return{d:"h",vis:e[0].repeat(N),txt:N+" "+e[1]+" ka "+nm[k]+" kitna hota hai?",spk:N+" "+e[2]+" का "+sp[k]+" कितना होता है?",ans:String(m),opts:mkO(m,[m+1,m-1,m+2,N,k].filter(x=>x>0)),fx:N+" ÷ "+k+" = "+m}},
+ ()=>{const a=p1(["1/2","1/4","3/4","1/3","2/3"]),[k,n]=a.split("/").map(Number);return{d:"h",vis:mini(pie(n,k,"#51cf66"),150),txt:"Hare rang ka hissa kitna hai?",spk:"हरे रंग का हिस्सा कितना है?",ans:fo(a),opts:mkO(fo(a),FL.map(fo)),fx:k+"/"+n+" = "+FN[a]}}];
+const CHP={shp:{levels:SL,pool:poolFor},
+ time:{levels:[{n:"Poore baje",e:"🕐",g:[T1]},{n:"Aadha & Savaa",e:"🕧",g:[T2,T1]},{n:"5-5 minute",e:"⏲️",g:[T3,T2]},{n:"Din & Mahine",e:"📅",g:T4},{n:"Super Challenge",e:"🏆",g:[T5,T3,...T4]}]},
+ money:{levels:[{n:"Sikke & Note",e:"🪙",g:[M1]},{n:"Paise jodo",e:"💰",g:[M2,M1]},{n:"Dukaan",e:"🛍️",g:[M3,M3b]},{n:"Bacha paisa",e:"💵",g:[M4]},{n:"Super Challenge",e:"🏆",g:[...M5,M4,M3]}]},
+ num:{levels:[{n:"Bada-Chhota",e:"⚖️",g:[N1,N1b]},{n:"Pehle-Baad",e:"🔢",g:[N2]},{n:"Dahai-Ikai",e:"🧱",g:[N3]},{n:"Ginti ke chhalaang",e:"🐸",g:[N4]},{n:"Super Challenge",e:"🏆",g:[...N5,N3,N4]}]},
+ meas:{levels:[{n:"Lamba-Bhaari",e:"🐘",g:[M_1]},{n:"Ruler padho",e:"📏",g:[M_2]},{n:"Kaunsi ikai?",e:"⚖️",g:[M_3]},{n:"Jodo-Ghatao",e:"➕",g:[M_4]},{n:"Super Challenge",e:"🏆",g:[...M_5,M_3,M_4]}]},
+ div:{levels:[{n:"Barabar baanto",e:"🍽️",g:[DV1]},{n:"Doston mein",e:"👧",g:[DV2,DV1]},{n:"Tokri banao",e:"🧺",g:[DV3]},{n:"Table se bhaag",e:"✖️",g:DV4},{n:"Super Challenge",e:"🏆",g:[...DV5,...DV4,DV3]}]},
+ pat:{levels:[{n:"Rang & Shape",e:"🔴",g:[PT1]},{n:"Number pattern",e:"🔢",g:[PT2]},{n:"Ulti ginti",e:"⏪",g:[PT3,PT2]},{n:"Do-teen ka pattern",e:"🧩",g:[PT4,PT1]},{n:"Super Challenge",e:"🏆",g:[...PT5,PT3,PT4]}]},
+ data:{levels:[{n:"Ginti karo",e:"🍎",g:[DA1]},{n:"Tally marks",e:"✍️",g:[DA2]},{n:"Picture graph",e:"🖼️",g:[DA3]},{n:"Bar graph",e:"📊",g:[DA4]},{n:"Super Challenge",e:"🏆",g:[...DA5,DA4,DA3]}]},
+ frac:{levels:[{n:"Aadha",e:"🍕",g:[F1]},{n:"Chauthai & Tihai",e:"🍰",g:[F2]},{n:"Hisse ginto",e:"🔢",g:[F3,F2]},{n:"Kiska bada?",e:"⚖️",g:[F4]},{n:"Super Challenge",e:"🏆",g:[...F5,F4,F3]}]}};
+function gen20(g){const out=[],seen=new Set();let t=0;while(out.length<20&&t<400){t++;const q=p1(g)();const k=q.txt+q.vis;if(seen.has(k))continue;seen.add(k);out.push(q)}while(out.length<20)out.push(p1(g)());return out}
+Object.keys(CHP).forEach(k=>{if(k!=="shp")CHP[k].pool=n=>gen20(CHP[k].levels[n-1].g)});
+//ENDCHAPTERS
 function buildHome(){
   $("modes").innerHTML="";
-  Object.keys(MODES).forEach(k=>{const m=MODES[k],b=document.createElement("button");b.className="mode"+(k==="shp"?" wide":"");b.style.background=m.c;
+  Object.keys(MODES).forEach(k=>{const m=MODES[k],b=document.createElement("button");b.className="mode"+(k==="frac"?" wide":"");b.style.background=m.c;
     b.innerHTML="<span>"+m.e+"</span>"+m.t;b.onclick=()=>{buildLevels(k);show("lvls")};$("modes").appendChild(b)});
 }
 function buildLevels(m){
   mode=m;$("ltitle").textContent=MODES[m].e+" "+MODES[m].t;$("grid").innerHTML="";
-  $("grid").style.gridTemplateColumns=m==="shp"?"1fr 1fr":"";
-  if(m==="shp"){SL.forEach((l,k)=>{const b=document.createElement("button");b.className="lv";if(k===4)b.style.gridColumn="1/-1";
-    b.innerHTML="<span style=\"font-size:2.2rem\">"+l.e+"</span><br>"+l.n+"<small>"+("⭐".repeat(save["shp"+(k+1)]||0)||"20 sawal")+"</small>";
-    b.onclick=()=>start("shp",k+1);$("grid").appendChild(b)});return}
+  $("grid").style.gridTemplateColumns=CHP[m]?"1fr 1fr":"";
+  if(CHP[m]){const LV=CHP[m].levels;LV.forEach((l,k)=>{const b=document.createElement("button");b.className="lv";if(k===LV.length-1)b.style.gridColumn="1/-1";
+    b.innerHTML="<span style=\"font-size:2.2rem\">"+l.e+"</span><br>"+l.n+"<small>"+("⭐".repeat(save[m+(k+1)]||0)||"20 sawal")+"</small>";
+    b.onclick=()=>start(m,k+1);$("grid").appendChild(b)});return}
   for(let n=1;n<=20;n++){
     const b=document.createElement("button");b.className="lv";
     b.innerHTML=(m==="tab"?n+"×":MODES[m].sym+n)+"<small>"+("⭐".repeat(save[m+n]||0)||"·")+"</small>";
@@ -203,7 +359,7 @@ function buildLevels(m){
 let mode="add",n=1,list=[],i=0,score=0,tried=false,locked=false,emo="🍦";
 function start(m,num){
   mode=m;n=num;i=0;score=0;
-  if(m==="shp")list=poolFor(num);else{
+  if(CHP[m])list=CHP[m].pool(num);else{
   const seq=[...Array(20).keys()].map(x=>x+1);
   list=m==="tab"?seq:m==="sub"?seq.map(x=>x-1+n):seq;
   if(m!=="tab")list.sort(()=>Math.random()-.5);}
@@ -218,13 +374,13 @@ function qOf(a){
 }
 let cur=null;
 function askS(){const q=list[i];tried=false;locked=false;cur=q;
- $("vis").className=q.big?"vis big":"vis";$("vis").innerHTML=q.vis||"";
+ $("vis").className=q.big?"vis big":q.mid?"vis mid":"vis";$("vis").innerHTML=q.vis||"";
  $("eq").className="eq txt";$("eq").textContent=q.txt;
  $("cnt").textContent=(i+1)+"/20";$("fill").style.width=(i/20*100)+"%";$("msg").textContent="";
  say(q.spk,1.3,i?1700:200);
  $("opts").innerHTML="";
  optsFor(q).forEach(v=>{const l=lab(v),b=document.createElement("button");b.className="op txt";b.innerHTML=l.t+(l.sm?"<small>"+l.sm+"</small>":"");b.onclick=()=>pick(b,v,q.ans);$("opts").appendChild(b)})}
-function ask(){if(mode==="shp")return askS();$("vis").className="vis";$("eq").className="eq";
+function ask(){if(CHP[mode])return askS();$("vis").className="vis";$("eq").className="eq";
   const a=list[i];cur=qOf(a);const ans=cur.ans;tried=false;locked=false;
   emo=CUTE[Math.floor(Math.random()*CUTE.length)];cur=qOf(a);
   $("vis").innerHTML=cur.v;
@@ -250,9 +406,9 @@ function pick(b,v,ans){
   if(v===ans){
     locked=true;if(!tried)score++;
     b.classList.add("right");sfx.ok();
-    $("msg").textContent=praise[Math.floor(Math.random()*praise.length)]+(mode==="shp"&&list[i].fx?" "+list[i].fx:"");
+    $("msg").textContent=praise[Math.floor(Math.random()*praise.length)]+(CHP[mode]&&list[i].fx?" "+list[i].fx:"");
     sparkle(b);
-    setTimeout(()=>{i++;i<20?ask():finish()},mode==="shp"?2300:1000);
+    setTimeout(()=>{i++;i<20?ask():finish()},CHP[mode]?2300:1000);
   }else{
     tried=true;b.classList.add("wrong");sfx.bad();
     $("msg").textContent=retry[Math.floor(Math.random()*retry.length)];
@@ -275,10 +431,10 @@ function finish(){
   const title=st===3?"SUPER CHAMPION!":st===2?"SHABASH!":"BAHUT BADHIYA!";
   $("big").innerHTML=[...title].map((c,k)=>"<span style=\"animation-delay:"+(.8+k*.07)+"s\">"+(c===" "?"&nbsp;":c)+"</span>").join("");
   $("stars").innerHTML=[1,2,3].map(k=>"<s style=\"animation-delay:"+(1.8+k*.4)+"s\">"+(k<=st?"⭐":"☆")+"</s>").join("");
-  $("score").textContent=(mode==="shp"?SL[n-1].n:MODES[mode].t+" "+(mode==="tab"?n+" ka table":MODES[mode].sym+n))+": 20 mein se "+score+" pehli baar mein sahi! 🎯";
+  $("score").textContent=(CHP[mode]?CHP[mode].levels[n-1].n:MODES[mode].t+" "+(mode==="tab"?n+" ka table":MODES[mode].sym+n))+": 20 mein se "+score+" pehli baar mein sahi! 🎯";
   const eb=$("ebtns");eb.innerHTML="";
   const mk=(t,f,p)=>{const b=document.createElement("button");b.textContent=t;if(p)b.className="pri";b.onclick=f;eb.appendChild(b)};
-  if(n<(mode==="shp"?5:20))mk("Agla ➡️",()=>start(mode,n+1),1);
+  if(n<(CHP[mode]?CHP[mode].levels.length:20))mk("Agla ➡️",()=>start(mode,n+1),1);
   mk("🔁 Dobara",()=>start(mode,n));
   mk("🏠 Home",()=>{$("end").classList.remove("on");buildHome();show("home")});
   $("end").classList.add("on");sfx.win();celebrate();
