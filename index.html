@@ -70,6 +70,12 @@ h1{color:#fff;text-align:center;font-size:2.2rem;margin:8px 0 0;text-shadow:0 4p
 @keyframes rise{to{transform:translateY(-120vh) rotate(15deg)}}
 .conf{top:-20px;width:10px;height:16px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.mode.wide{grid-column:1/-1}
+.eq.txt{font-size:clamp(1.25rem,5.6vw,1.8rem);line-height:1.3}
+.vis svg{width:min(50vw,180px);height:auto;display:block;margin:0 auto}
+.vis.big{font-size:5.2rem;line-height:1.1}
+.op.txt{font-size:1.5rem;padding:12px 4px}
+.op small{display:block;font-size:.9rem;font-weight:600;opacity:.95}
 </style>
 </head>
 <body>
@@ -121,15 +127,73 @@ const MODES={
  add:{t:"Add",e:"➕",sym:"+",c:"#00b4d8",w:"जमा"},
  sub:{t:"Minus",e:"➖",sym:"−",c:"#ff6b6b",w:"घटा"},
  mul:{t:"Multiply",e:"✖️",sym:"×",c:"#9b5de5",w:"गुणा"},
- tab:{t:"Table",e:"📖",sym:"×",c:"#06a77d",w:"गुणा"}};
+ tab:{t:"Table",e:"📖",sym:"×",c:"#06a77d",w:"गुणा"},
+ shp:{t:"Shapes",e:"🔷",sym:"",c:"#ff7a59",w:""}};
 const CUTE=["🍦","🧁","🍭","🍎","🐥","🐶","🌸","⭐","🍓","🐱"];
+//SHAPES
+const SH={circle:{n:"Circle",h:"गोल",d:2,s:"सर्कल"},square:{n:"Square",h:"वर्ग",d:2,s:"स्क्वेयर"},rectangle:{n:"Rectangle",h:"आयत",d:2,s:"रेक्टैंगल"},triangle:{n:"Triangle",h:"त्रिभुज",d:2,s:"ट्राएंगल"},oval:{n:"Oval",h:"अंडाकार",d:2,s:"ओवल"},star:{n:"Star",h:"तारा",d:2,s:"स्टार"},heart:{n:"Heart",h:"दिल",d:2,s:"हार्ट"},diamond:{n:"Diamond",h:"हीरा",d:2,s:"डायमंड"},pentagon:{n:"Pentagon",h:"पंचभुज",d:2,s:"पेंटागन"},hexagon:{n:"Hexagon",h:"षट्भुज",d:2,s:"हेक्सागन"},semicircle:{n:"Semicircle",h:"अर्धवृत्त",d:2,s:"सेमीसर्कल"},
+ sphere:{n:"Sphere",h:"गोला",d:3,s:"स्फियर"},cube:{n:"Cube",h:"घन",d:3,s:"क्यूब"},cuboid:{n:"Cuboid",h:"घनाभ",d:3,s:"क्यूबॉइड"},cylinder:{n:"Cylinder",h:"बेलन",d:3,s:"सिलेंडर"},cone:{n:"Cone",h:"शंकु",d:3,s:"कोन"},pyramid:{n:"Pyramid",h:"पिरामिड",d:3,s:"पिरामिड"}};
+const FACT={circle:"Circle ke koi corner nahi hota!",square:"Square ke 4 sides barabar hote hain.",rectangle:"Rectangle ke 2 sides lambe, 2 chhote.",triangle:"Triangle ke 3 sides aur 3 corners hote hain.",oval:"Oval anday jaisa lamba gol hota hai.",star:"Star ke 5 nok hote hain.",heart:"Heart pyaar ka shape hai!",diamond:"Diamond (patang jaisa) ke 4 sides hote hain.",pentagon:"Pentagon ke 5 sides hote hain.",hexagon:"Hexagon ke 6 sides — shahad ke chhatte jaisa!",semicircle:"Semicircle aadha circle hota hai.",sphere:"Sphere har taraf se gol hai, ludhakta hai!",cube:"Cube ke 6 face barabar square hote hain.",cuboid:"Cuboid dibbe jaisa hai — 6 rectangle face.",cylinder:"Cylinder ke upar-neeche gol face hote hain.",cone:"Cone ka ek nok-daar top hota hai.",pyramid:"Pyramid: 4 triangle face aur 1 square base.","2D":"2D shape sapaat (flat) hota hai.","3D":"3D shape thos hota hai — usse utha sakte hain!"};
+const sw_=a=>a.sort(()=>Math.random()-.5);
+const ST_='stroke="#2b1b5a" stroke-width="2.5" stroke-linejoin="round"';
+const pg=(p,c)=>'<polygon points="'+p+'" fill="'+c+'" '+ST_+'/>';
+function svg(id){let g="";
+ switch(id){
+ case"circle":g='<circle cx="50" cy="50" r="40" fill="#ff6b6b" '+ST_+'/>';break;
+ case"square":g='<rect x="14" y="14" width="72" height="72" fill="#4dabf7" '+ST_+'/>';break;
+ case"rectangle":g='<rect x="6" y="26" width="88" height="48" fill="#51cf66" '+ST_+'/>';break;
+ case"triangle":g=pg("50,10 92,86 8,86","#ffd43b");break;
+ case"oval":g='<ellipse cx="50" cy="50" rx="44" ry="28" fill="#cc5de8" '+ST_+'/>';break;
+ case"star":g=pg("50,6 62,38 96,38 68,58 79,92 50,72 21,92 32,58 4,38 38,38","#ffa94d");break;
+ case"heart":g='<path d="M50 88 C10 56 6 28 26 18 C40 12 50 24 50 30 C50 24 60 12 74 18 C94 28 90 56 50 88Z" fill="#f06595" '+ST_+'/>';break;
+ case"diamond":g=pg("50,6 90,50 50,94 10,50","#22b8cf");break;
+ case"pentagon":g=pg("50,8 92,38 76,88 24,88 8,38","#94d82d");break;
+ case"hexagon":g=pg("26,10 74,10 97,50 74,90 26,90 3,50","#845ef7");break;
+ case"semicircle":g='<path d="M8 68 A42 42 0 0 1 92 68 Z" fill="#ff922b" '+ST_+'/>';break;
+ case"sphere":g='<defs><radialGradient id="sg" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#ff8787"/><stop offset="1" stop-color="#c92a2a"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="url(#sg)" '+ST_+'/>';break;
+ case"cube":g=pg("50,8 88,28 50,48 12,28","#a5d8ff")+pg("12,28 50,48 50,92 12,72","#4dabf7")+pg("88,28 50,48 50,92 88,72","#1c7ed6");break;
+ case"cuboid":g=pg("22,18 92,18 78,38 8,38","#b2f2bb")+pg("8,38 78,38 78,86 8,86","#51cf66")+pg("78,38 92,18 92,66 78,86","#2b8a3e");break;
+ case"cylinder":g='<path d="M18 24 V74 A32 11 0 0 0 82 74 V24 Z" fill="#ffa94d" '+ST_+'/><ellipse cx="50" cy="24" rx="32" ry="11" fill="#ffd8a8" '+ST_+'/>';break;
+ case"cone":g='<path d="M50 8 L86 76 A36 12 0 0 1 14 76 Z" fill="#ff8787" '+ST_+'/>';break;
+ case"pyramid":g=pg("50,8 10,72 52,92","#ffe066")+pg("50,8 52,92 90,68","#f59f00");break}
+ return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+g+'</svg>'}
+const D2=Object.keys(SH).filter(k=>SH[k].d===2),D3=Object.keys(SH).filter(k=>SH[k].d===3);
+const BANK=[];
+const lv2={circle:"e",square:"e",rectangle:"e",triangle:"e",oval:"m",star:"m",heart:"m",diamond:"m",pentagon:"h",hexagon:"h",semicircle:"h"},lv3={sphere:"e",cube:"e",cylinder:"e",cone:"e",cuboid:"m",pyramid:"m"};
+D2.forEach(k=>BANK.push({c:"id",dm:2,d:lv2[k],vis:svg(k),txt:"Ye kaunsa shape hai?",spk:"ये कौन सा शेप है?",ans:k,pool:D2,fx:FACT[k]}));
+D3.forEach(k=>BANK.push({c:"id",dm:3,d:lv3[k],vis:svg(k),txt:"Ye kaunsa 3D shape hai?",spk:"ये कौन सा थ्री-डी शेप है?",ans:k,pool:D3,fx:FACT[k]}));
+const OBJ=[["⚽","Football","फुटबॉल","sphere","e"],["🏀","Basketball","बास्केटबॉल","sphere","e"],["🍊","Orange","संतरा","sphere","e"],["🌍","Globe","ग्लोब","sphere","e"],["🎾","Tennis ball","टेनिस बॉल","sphere","e"],["🎲","Dice","पासा","cube","e"],["🧊","Ice cube","बर्फ़ का टुकड़ा","cube","m"],["🎁","Gift box","गिफ्ट का डिब्बा","cube","m"],["🥫","Tin can","टिन का डिब्बा","cylinder","e"],["🥁","Drum","ढोल","cylinder","m"],["🕯️","Candle","मोमबत्ती","cylinder","m"],["🔋","Battery","बैटरी","cylinder","m"],["🛢️","Oil barrel","ड्रम","cylinder","m"],["📦","Box","डिब्बा","cuboid","e"],["🧱","Brick","ईंट","cuboid","m"],["📺","Old TV","टीवी","cuboid","m"],["🧃","Juice box","जूस का डिब्बा","cuboid","m"],["🍦","Ice cream cone","आइसक्रीम कोन","cone","e"],["🎉","Party popper","पार्टी पॉपर","cone","h"],
+ ["🕐","Clock face","घड़ी","circle","e"],["🍪","Cookie","बिस्किट","circle","e"],["💿","CD","सीडी","circle","e"],["🎯","Dartboard","डार्ट बोर्ड","circle","m"],["🍕","Pizza slice","पिज़्ज़ा का टुकड़ा","triangle","e"],["🚪","Door","दरवाज़ा","rectangle","e"],["📱","Phone screen","फोन की स्क्रीन","rectangle","e"],["✉️","Envelope","लिफाफा","rectangle","m"],["🍫","Chocolate bar","चॉकलेट","rectangle","m"],["🪁","Kite","पतंग","diamond","m"],["🥚","Egg","अंडा","oval","m"],["⭐","Star","तारा","star","e"],["❤️","Heart","दिल","heart","e"]];
+OBJ.forEach(([e,n,h,s,d],k)=>{const dm=SH[s].d;
+ BANK.push({c:"obj",dm,d,vis:e,big:1,txt:n+" ka shape kaunsa dikhta hai?",spk:h+" का शेप कौन सा दिखता है?",ans:s,pool:dm===3?D3:D2,fx:FACT[s]});
+ if(dm===3&&k%2===0)BANK.push({c:"dim",obj:1,dm:0,d:"e",vis:e,big:1,txt:n+" 2D hai ya 3D?",spk:h+" टू-डी है या थ्री-डी?",ans:"3D",opts:["2D","3D"],fx:FACT["3D"]})});
+[...D2,...D3].forEach(k=>{BANK.push({c:"dim",dm:0,d:"m",vis:svg(k),txt:"Ye 2D hai ya 3D?",spk:"ये टू-डी है या थ्री-डी?",ans:SH[k].d+"D",opts:["2D","3D"],fx:FACT[SH[k].d+"D"]});
+ BANK.push({c:"kind",dm:0,d:"m",vis:"",txt:SH[k].d===3?"Inme se kaunsa 3D (solid) shape hai?":"Inme se kaunsa 2D (flat) shape hai?",spk:SH[k].d===3?"इनमें से कौन सा थ्री-डी शेप है?":"इनमें से कौन सा टू-डी शेप है?",ans:k,pool:SH[k].d===3?D2:D3,fx:FACT[k]})});
+[["Kis shape ke 3 sides hote hain?","किस शेप के तीन साइड होते हैं?","triangle","e"],["Kis shape ke saare 4 sides barabar hote hain?","किस शेप के चारों साइड बराबर होते हैं?","square","e"],["Kis shape ke 4 sides hote hain — 2 lambe aur 2 chhote?","किस शेप के चार साइड होते हैं, दो लंबे और दो छोटे?","rectangle","m"],["Kis shape ka koi corner (kona) nahi hota?","किस शेप का कोई कोना नहीं होता?","circle","e"],["Kis shape ke 5 sides hote hain?","किस शेप के पाँच साइड होते हैं?","pentagon","h"],["Kis shape ke 6 sides hote hain?","किस शेप के छह साइड होते हैं?","hexagon","h"],["Kaunsa shape ludhakta hai aur har taraf se gol hai?","कौन सा शेप लुढ़कता है और हर तरफ़ से गोल है?","sphere","e"],["Kis 3D shape ke saare 6 face square hote hain?","किस शेप के छहों फेस स्क्वेयर होते हैं?","cube","m"],["Kis 3D shape ke upar ek nok aur neeche gol base hota hai?","किस शेप के ऊपर एक नोक और नीचे गोल बेस होता है?","cone","m"],["Kis 3D shape ke upar aur neeche do gol face hote hain?","किस शेप के ऊपर और नीचे दो गोल फेस होते हैं?","cylinder","h"],["Kis 3D shape ke 4 triangle face aur 1 square base hota hai?","किस शेप के चार ट्राएंगल फेस और एक स्क्वेयर बेस होता है?","pyramid","h"],["Kis 3D shape ke 6 face rectangle jaise hote hain (dibba)?","किस शेप के छह फेस रेक्टैंगल जैसे होते हैं?","cuboid","m"]]
+ .forEach(([t,s,a,d])=>BANK.push({c:"prop",dm:SH[a].d,d,vis:"",txt:t,spk:s,ans:a,pool:SH[a].d===3?D3:D2,fx:FACT[a]}));
+const NN={sides:["sides (kinare)","साइड"],corners:["corners (kone)","कोने"],faces:["faces","फेस"],edges:["edges (kinare)","एज"],points:["points (nok)","पॉइंट"],"flat faces":["flat faces","फ्लैट फेस"]};
+[["triangle","sides",3,"e"],["triangle","corners",3,"e"],["square","corners",4,"e"],["square","sides",4,"e"],["rectangle","sides",4,"e"],["rectangle","corners",4,"e"],["circle","corners",0,"m"],["pentagon","sides",5,"h"],["hexagon","sides",6,"h"],["star","points",5,"m"],["cube","faces",6,"m"],["cube","corners",8,"h"],["cube","edges",12,"h"],["cuboid","faces",6,"m"],["cone","flat faces",1,"h"],["cylinder","flat faces",2,"h"],["sphere","flat faces",0,"h"],["pyramid","faces",5,"h"]]
+ .forEach(([k,w,a,d])=>BANK.push({c:"num",num:1,dm:SH[k].d,d,vis:svg(k),txt:SH[k].n+" ke kitne "+NN[w][0]+" hote hain?",spk:SH[k].s+" के कितने "+NN[w][1]+" होते हैं?",ans:String(a)}));
+const SL=[{n:"2D Shapes",e:"🔺"},{n:"3D Shapes",e:"🧊"},{n:"Ghar ki cheezein",e:"🏠"},{n:"2D ya 3D?",e:"🤔"},{n:"Super Challenge",e:"🏆"}];
+const BASIC=["id","obj","prop","num"];
+const PF=[q=>q.dm===2&&q.d!=="h"&&BASIC.includes(q.c),q=>q.dm===3&&q.d!=="h"&&BASIC.includes(q.c),q=>q.c==="obj"||q.obj,q=>q.c==="dim"||q.c==="kind",q=>q.d!=="e"];
+const poolFor=n=>sw_(BANK.filter(PF[n-1])).slice(0,20);
+function lab(v){if(SH[v])return{t:SH[v].n,sm:SH[v].h};if(v==="2D")return{t:"2D",sm:"सपाट (flat)"};if(v==="3D")return{t:"3D",sm:"ठोस (solid)"};return{t:v}}
+function optsFor(q){if(q.opts)return sw_(q.opts.slice());
+ if(q.num){const a=+q.ans,c=sw_([a-2,a-1,a+1,a+2,a+3,a-3,a+4].filter(x=>x>=0&&x!==a)).slice(0,3).map(String);c.push(q.ans);return sw_(c)}
+ const c=sw_(q.pool.filter(x=>x!==q.ans)).slice(0,3);c.push(q.ans);return sw_(c)}
+//ENDSHAPES
 function buildHome(){
   $("modes").innerHTML="";
-  Object.keys(MODES).forEach(k=>{const m=MODES[k],b=document.createElement("button");b.className="mode";b.style.background=m.c;
+  Object.keys(MODES).forEach(k=>{const m=MODES[k],b=document.createElement("button");b.className="mode"+(k==="shp"?" wide":"");b.style.background=m.c;
     b.innerHTML="<span>"+m.e+"</span>"+m.t;b.onclick=()=>{buildLevels(k);show("lvls")};$("modes").appendChild(b)});
 }
 function buildLevels(m){
   mode=m;$("ltitle").textContent=MODES[m].e+" "+MODES[m].t;$("grid").innerHTML="";
+  $("grid").style.gridTemplateColumns=m==="shp"?"1fr 1fr":"";
+  if(m==="shp"){SL.forEach((l,k)=>{const b=document.createElement("button");b.className="lv";if(k===4)b.style.gridColumn="1/-1";
+    b.innerHTML="<span style=\"font-size:2.2rem\">"+l.e+"</span><br>"+l.n+"<small>"+("⭐".repeat(save["shp"+(k+1)]||0)||"20 sawal")+"</small>";
+    b.onclick=()=>start("shp",k+1);$("grid").appendChild(b)});return}
   for(let n=1;n<=20;n++){
     const b=document.createElement("button");b.className="lv";
     b.innerHTML=(m==="tab"?n+"×":MODES[m].sym+n)+"<small>"+("⭐".repeat(save[m+n]||0)||"·")+"</small>";
@@ -139,9 +203,10 @@ function buildLevels(m){
 let mode="add",n=1,list=[],i=0,score=0,tried=false,locked=false,emo="🍦";
 function start(m,num){
   mode=m;n=num;i=0;score=0;
+  if(m==="shp")list=poolFor(num);else{
   const seq=[...Array(20).keys()].map(x=>x+1);
   list=m==="tab"?seq:m==="sub"?seq.map(x=>x-1+n):seq;
-  if(m!=="tab")list.sort(()=>Math.random()-.5);
+  if(m!=="tab")list.sort(()=>Math.random()-.5);}
   $("end").classList.remove("on");show("game");ask();
 }
 const rep=(e,c)=>e.repeat(c);
@@ -152,7 +217,14 @@ function qOf(a){
   let g="";if(a*n<=24)for(let k=0;k<n;k++)g+="<span class=g>"+rep(emo,a)+"</span>";return{t:n+" × "+a,ans:a*n,v:g,s:n+" गुणा "+a};
 }
 let cur=null;
-function ask(){
+function askS(){const q=list[i];tried=false;locked=false;cur=q;
+ $("vis").className=q.big?"vis big":"vis";$("vis").innerHTML=q.vis||"";
+ $("eq").className="eq txt";$("eq").textContent=q.txt;
+ $("cnt").textContent=(i+1)+"/20";$("fill").style.width=(i/20*100)+"%";$("msg").textContent="";
+ say(q.spk,1.3,i?1700:200);
+ $("opts").innerHTML="";
+ optsFor(q).forEach(v=>{const l=lab(v),b=document.createElement("button");b.className="op txt";b.innerHTML=l.t+(l.sm?"<small>"+l.sm+"</small>":"");b.onclick=()=>pick(b,v,q.ans);$("opts").appendChild(b)})}
+function ask(){if(mode==="shp")return askS();$("vis").className="vis";$("eq").className="eq";
   const a=list[i];cur=qOf(a);const ans=cur.ans;tried=false;locked=false;
   emo=CUTE[Math.floor(Math.random()*CUTE.length)];cur=qOf(a);
   $("vis").innerHTML=cur.v;
@@ -178,9 +250,9 @@ function pick(b,v,ans){
   if(v===ans){
     locked=true;if(!tried)score++;
     b.classList.add("right");sfx.ok();
-    $("msg").textContent=praise[Math.floor(Math.random()*praise.length)];
+    $("msg").textContent=praise[Math.floor(Math.random()*praise.length)]+(mode==="shp"&&list[i].fx?" "+list[i].fx:"");
     sparkle(b);
-    setTimeout(()=>{i++;i<20?ask():finish()},1000);
+    setTimeout(()=>{i++;i<20?ask():finish()},mode==="shp"?2300:1000);
   }else{
     tried=true;b.classList.add("wrong");sfx.bad();
     $("msg").textContent=retry[Math.floor(Math.random()*retry.length)];
@@ -203,10 +275,10 @@ function finish(){
   const title=st===3?"SUPER CHAMPION!":st===2?"SHABASH!":"BAHUT BADHIYA!";
   $("big").innerHTML=[...title].map((c,k)=>"<span style=\"animation-delay:"+(.8+k*.07)+"s\">"+(c===" "?"&nbsp;":c)+"</span>").join("");
   $("stars").innerHTML=[1,2,3].map(k=>"<s style=\"animation-delay:"+(1.8+k*.4)+"s\">"+(k<=st?"⭐":"☆")+"</s>").join("");
-  $("score").textContent=MODES[mode].t+" "+(mode==="tab"?n+" ka table":MODES[mode].sym+n)+": 20 mein se "+score+" pehli baar mein sahi! 🎯";
+  $("score").textContent=(mode==="shp"?SL[n-1].n:MODES[mode].t+" "+(mode==="tab"?n+" ka table":MODES[mode].sym+n))+": 20 mein se "+score+" pehli baar mein sahi! 🎯";
   const eb=$("ebtns");eb.innerHTML="";
   const mk=(t,f,p)=>{const b=document.createElement("button");b.textContent=t;if(p)b.className="pri";b.onclick=f;eb.appendChild(b)};
-  if(n<20)mk("Agla ➡️",()=>start(mode,n+1),1);
+  if(n<(mode==="shp"?5:20))mk("Agla ➡️",()=>start(mode,n+1),1);
   mk("🔁 Dobara",()=>start(mode,n));
   mk("🏠 Home",()=>{$("end").classList.remove("on");buildHome();show("home")});
   $("end").classList.add("on");sfx.win();celebrate();
